@@ -43,6 +43,7 @@ public class ProductServiceImpl implements ProductService {
         try {
             Product product = mapToProduct(productDto, new Product());
             product.setCreatedAt(LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss")));
+            product.setUpdatedAt(LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss")));
             Product createdProduct = productRepo.save(product);
             response.setMsgInfo(new MsgInfo(Constants.CREATED_STATUS_CODE, Constants.SUCCESS_TAG, "New product created successfully"));
             response.setPayload(mapper.readValue(mapper.writeValueAsString(createdProduct), Payload.class));
@@ -76,10 +77,17 @@ public class ProductServiceImpl implements ProductService {
         Response response = new Response();
         response.setMetadata(Utility.updatedMetadata(new Metadata()));
         try {
-            Product product = productRepo.findById(productId).orElseThrow(() -> new ServiceException(Constants.NOT_FOUND_STATUS_CODE,
-                    String.format("Product not found with ID: %s", productId)));
-            response.setPayload(mapper.readValue(mapper.writeValueAsString(product), Payload.class));
-            response.setMsgInfo(new MsgInfo(Constants.OK_STATUS_CODE, Constants.SUCCESS_TAG, "Product fetched successfully"));
+            Optional<Product> optionalProduct = productRepo.findById(productId);
+            if (optionalProduct.isPresent()) {
+                response.setPayload(mapper.readValue(mapper.writeValueAsString(optionalProduct.get()), Payload.class));
+                response.setMsgInfo(new MsgInfo(Constants.OK_STATUS_CODE, Constants.SUCCESS_TAG, "Product fetched successfully"));
+            } else {
+                throw new ServiceException(Constants.NOT_FOUND_STATUS_CODE, String.format("Product not found with ID: %s", productId));
+            }
+        } catch (ServiceException e) {
+            logger.log(3, response.getMetadata().getSource(), response.getMetadata().getRequestId(),
+                    Utility.getLogMessage(ProductServiceImpl.class, Utility.getCurrentMethodName(), String.format("Response ::: %s", e.getMessage())));
+            throw new ServiceException(Constants.NOT_FOUND_STATUS_CODE, e.getExceptionMessage());
         } catch (Exception e) {
             logger.log(3, response.getMetadata().getSource(), response.getMetadata().getRequestId(),
                     Utility.getLogMessage(ProductServiceImpl.class, Utility.getCurrentMethodName(), String.format("Response ::: %s", e.getMessage())));
@@ -113,13 +121,20 @@ public class ProductServiceImpl implements ProductService {
         Response response = new Response();
         response.setMetadata(Utility.updatedMetadata(new Metadata()));
         try {
-            Product existingProduct = productRepo.findById(productId).orElseThrow(() -> new ServiceException(Constants.NOT_FOUND_STATUS_CODE,
-                    String.format("Product not found with ID: %s", productId)));
-            Product product = mapToProduct(productDto, existingProduct);
-            product.setUpdatedAt(LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss")));
-            Product updatedProduct = productRepo.save(product);
-            response.setMsgInfo(new MsgInfo(Constants.OK_STATUS_CODE, Constants.SUCCESS_TAG, "Product updated successfully."));
-            response.setPayload(mapper.readValue(mapper.writeValueAsString(updatedProduct), Payload.class));
+            Optional<Product> existingProduct = productRepo.findById(productId);
+            if (existingProduct.isPresent()) {
+                Product product = mapToProduct(productDto, existingProduct.get());
+                product.setUpdatedAt(LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss")));
+                Product updatedProduct = productRepo.save(product);
+                response.setMsgInfo(new MsgInfo(Constants.OK_STATUS_CODE, Constants.SUCCESS_TAG, "Product updated successfully."));
+                response.setPayload(mapper.readValue(mapper.writeValueAsString(updatedProduct), Payload.class));
+            } else {
+                throw new ServiceException(Constants.NOT_FOUND_STATUS_CODE, String.format("Product not found with ID: %s", productId));
+            }
+        } catch (ServiceException e) {
+            logger.log(3, response.getMetadata().getSource(), response.getMetadata().getRequestId(),
+                    Utility.getLogMessage(ProductServiceImpl.class, Utility.getCurrentMethodName(), String.format("Response ::: %s", e.getMessage())));
+            throw new ServiceException(Constants.NOT_FOUND_STATUS_CODE, e.getExceptionMessage());
         } catch (Exception e) {
             logger.log(3, response.getMetadata().getSource(), response.getMetadata().getRequestId(),
                     Utility.getLogMessage(ProductServiceImpl.class, Utility.getCurrentMethodName(), String.format("Response ::: %s", e.getMessage())));
@@ -133,10 +148,17 @@ public class ProductServiceImpl implements ProductService {
         Response response = new Response();
         response.setMetadata(Utility.updatedMetadata(new Metadata()));
         try {
-            Product product = productRepo.findById(productId).orElseThrow(() -> new ServiceException(Constants.NOT_FOUND_STATUS_CODE,
-                    String.format("Product not found with ID: %s", productId)));
-            productRepo.delete(product);
-            response.setMsgInfo(new MsgInfo(Constants.OK_STATUS_CODE, Constants.SUCCESS_TAG, "Product deleted successfully."));
+            Optional<Product> optionalProduct = productRepo.findById(productId);
+            if (optionalProduct.isPresent()) {
+                productRepo.delete(optionalProduct.get());
+                response.setMsgInfo(new MsgInfo(Constants.OK_STATUS_CODE, Constants.SUCCESS_TAG, "Product deleted successfully."));
+            } else {
+                throw new ServiceException(Constants.NOT_FOUND_STATUS_CODE, String.format("Product not found with ID: %s", productId));
+            }
+        } catch (ServiceException e) {
+            logger.log(3, response.getMetadata().getSource(), response.getMetadata().getRequestId(),
+                    Utility.getLogMessage(ProductServiceImpl.class, Utility.getCurrentMethodName(), String.format("Response ::: %s", e.getMessage())));
+            throw new ServiceException(Constants.NOT_FOUND_STATUS_CODE, e.getExceptionMessage());
         } catch (Exception e) {
             logger.log(3, response.getMetadata().getSource(), response.getMetadata().getRequestId(),
                     Utility.getLogMessage(ProductServiceImpl.class, Utility.getCurrentMethodName(), String.format("Response ::: %s", e.getMessage())));
