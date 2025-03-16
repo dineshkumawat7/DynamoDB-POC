@@ -9,6 +9,11 @@ import com.amazon.aws.dynamodb.log.CloudWatchLogs;
 import com.amazon.aws.dynamodb.service.ProductService;
 import com.amazon.aws.dynamodb.util.Constants;
 import com.amazon.aws.dynamodb.util.Utility;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -22,8 +27,15 @@ public class ProductController {
     @Autowired
     private CloudWatchLogs logger;
 
+    @Operation(summary = "Create a new product", description = "Creates a new product and returns a response with metadata.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "201", description = "Product successfully created",
+                    content = @Content(schema = @Schema(implementation = Response.class))),
+            @ApiResponse(responseCode = "400", description = "Invalid input data"),
+            @ApiResponse(responseCode = "500", description = "Internal server error")
+    })
     @PostMapping
-    public ResponseEntity<Response> createNewProduct(ProductDto productDto) {
+    public ResponseEntity<Response> createNewProduct(@RequestBody ProductDto productDto) {
         ResponseEntity<Response> response = null;
         try {
             response = productService.createNewProduct(productDto);
@@ -33,6 +45,12 @@ public class ProductController {
         return getSuccessResponse(response);
     }
 
+    @Operation(summary = "Get all products", description = "Fetches a list of all available products.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Successfully retrieved products",
+                    content = @Content(schema = @Schema(implementation = Response.class))),
+            @ApiResponse(responseCode = "500", description = "Internal server error")
+    })
     @GetMapping
     public ResponseEntity<Response> getAllProducts() {
         ResponseEntity<Response> response = null;
@@ -44,6 +62,13 @@ public class ProductController {
         return getSuccessResponse(response);
     }
 
+    @Operation(summary = "Get product by ID", description = "Fetches a product based on the provided product ID.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Product successfully retrieved",
+                    content = @Content(schema = @Schema(implementation = Response.class))),
+            @ApiResponse(responseCode = "404", description = "Product not found"),
+            @ApiResponse(responseCode = "500", description = "Internal server error")
+    })
     @GetMapping("/{id}")
     public ResponseEntity<Response> getProductById(@PathVariable String id) {
         ResponseEntity<Response> response = null;
@@ -55,8 +80,16 @@ public class ProductController {
         return getSuccessResponse(response);
     }
 
+    @Operation(summary = "Update product by ID", description = "Updates the product details for the given product ID.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Product successfully updated",
+                    content = @Content(schema = @Schema(implementation = Response.class))),
+            @ApiResponse(responseCode = "404", description = "Product not found"),
+            @ApiResponse(responseCode = "400", description = "Invalid input data"),
+            @ApiResponse(responseCode = "500", description = "Internal server error")
+    })
     @PutMapping("/{id}")
-    public ResponseEntity<Response> updateProductById(@PathVariable("id") String productId, ProductDto productDto) {
+    public ResponseEntity<Response> updateProductById(@PathVariable("id") String productId, @RequestBody ProductDto productDto) {
         ResponseEntity<Response> response = null;
         try {
             response = productService.updateProduct(productId, productDto);
@@ -66,6 +99,13 @@ public class ProductController {
         return getSuccessResponse(response);
     }
 
+    @Operation(summary = "Delete product by ID", description = "Deletes a product based on the provided product ID.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Product successfully deleted",
+                    content = @Content(schema = @Schema(implementation = Response.class))),
+            @ApiResponse(responseCode = "404", description = "Product not found"),
+            @ApiResponse(responseCode = "500", description = "Internal server error")
+    })
     @DeleteMapping("/{id}")
     public ResponseEntity<Response> deleteProduct(@PathVariable String id) {
         ResponseEntity<Response> response = null;
@@ -123,6 +163,11 @@ public class ProductController {
      *
      * @return Object
      */
+    @Operation(summary = "Health Check", description = "Checks the status of the application.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Application is running"),
+            @ApiResponse(responseCode = "500", description = "Internal server error")
+    })
     @GetMapping("/status")
     public Object healthCheck() {
         return "Application is running up";

@@ -6,16 +6,17 @@ import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBHashKey;
 import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBTable;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 
 import java.io.Serializable;
 import java.util.List;
-import java.util.UUID;
 
+@JsonPropertyOrder({"id", "name", "description", "price", "category", "quantity", "available", "tags", "imageUrls", "brand", "rating"})
 @DynamoDBTable(tableName = "PRODUCT_TABLE")
 public class Product implements Serializable {
     @DynamoDBHashKey
     @JsonProperty("id")
-    private String id = UUID.randomUUID().toString();
+    private String id;
 
     @DynamoDBAttribute
     @JsonProperty("name")
@@ -55,12 +56,12 @@ public class Product implements Serializable {
 
     @DynamoDBAttribute
     @JsonProperty("createdAt")
-    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
+    @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss")
     private String createdAt;
 
     @DynamoDBAttribute
     @JsonProperty("updatedAt")
-    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
+    @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss")
     private String updatedAt;
 
     @DynamoDBAttribute
@@ -95,20 +96,20 @@ public class Product implements Serializable {
         this.id = id;
     }
 
-    public String getDescription() {
-        return description;
-    }
-
-    public void setDescription(String description) {
-        this.description = description;
-    }
-
     public String getName() {
         return name;
     }
 
     public void setName(String name) {
         this.name = name;
+    }
+
+    public String getDescription() {
+        return description;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
     }
 
     public double getPrice() {
@@ -139,7 +140,7 @@ public class Product implements Serializable {
         return tags;
     }
 
-    public void setTags() {
+    public void setTags(List<String> tags) {
         this.tags = tags;
     }
 
@@ -181,10 +182,6 @@ public class Product implements Serializable {
 
     public void setUpdatedAt(String updatedAt) {
         this.updatedAt = updatedAt;
-    }
-
-    public void setTags(List<String> tags) {
-        this.tags = tags;
     }
 
     public boolean isAvailable() {

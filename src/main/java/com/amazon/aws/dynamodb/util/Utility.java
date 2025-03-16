@@ -84,7 +84,7 @@ public class Utility {
             metadata.setSource("Amazon");
         }
         if (metadata.getApiVersion() == null || metadata.getApiVersion().isBlank() || metadata.getApiVersion().equalsIgnoreCase("")) {
-            metadata.setApiVersion("v1");
+            metadata.setApiVersion("v0.0.1");
         }
         metadata.setTimestamp(String.format("%s", new Date()));
         return metadata;

@@ -1,11 +1,12 @@
 package com.amazon.aws.dynamodb.dto.common;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 
-import java.math.BigDecimal;
-import java.time.LocalDateTime;
 import java.util.List;
 
+@JsonPropertyOrder({"id", "name", "description", "price", "category", "quantity", "available", "tags", "imageUrls", "brand", "rating"})
 public class Payload {
     @JsonProperty("id")
     private String id;
@@ -38,9 +39,11 @@ public class Payload {
     private int rating;
 
     @JsonProperty
+    @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss")
     private String createdAt;
 
     @JsonProperty
+    @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss")
     private String updatedAt;
 
     @JsonProperty("available")
